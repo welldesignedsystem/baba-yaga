@@ -20,28 +20,33 @@ GOLDEN_DATASET = [
         "prompt": "What is the capital of France? Answer in one word.",
         "must_contain": ["paris"],
         "max_words": 5,
+        "covers": ["prompt:factual-qa", "domain:geography"],
     },
     {
         "id": "capital-japan",
         "prompt": "What is the capital of Japan? Answer in one word.",
         "must_contain": ["tokyo"],
         "max_words": 5,
+        "covers": ["prompt:factual-qa", "domain:geography"],
     },
     {
         "id": "meaning-of-life",
         "prompt": "What is the meaning of life? Answer in 10 words or fewer.",
         "max_words": 15,
+        "covers": ["prompt:philosophical", "constraint:word-limit"],
     },
     {
         "id": "python-list-comprehension",
         "prompt": "Write a Python list comprehension that squares all even numbers from 0 to 20.",
         "must_contain": ["**2", "range", "if", "%"],
         "must_not_contain": ["import"],
+        "covers": ["prompt:code-generation", "domain:python"],
     },
     {
         "id": "json-output",
         "prompt": 'Return only valid JSON: {"name": "Alice", "age": 30} but with age incremented by 1. Output ONLY the JSON.',
         "expects_valid_json": True,
+        "covers": ["prompt:structured-output", "format:json"],
     },
 ]
 
