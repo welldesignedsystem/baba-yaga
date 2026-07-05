@@ -2,6 +2,11 @@ import json
 import statistics
 from pathlib import Path
 
+<<<<<<< HEAD
+=======
+from deepeval.metrics import BaseMetric
+from deepeval.test_case import LLMTestCase
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 from dotenv import load_dotenv
 
 from llm import openrouter_chat_model
@@ -10,6 +15,10 @@ load_dotenv()
 
 BASELINE_FILE = Path(__file__).parent.parent / "eval-baseline.json"
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 GOLDEN_DATASET = [
     {
         "id": "capital-france",
@@ -42,6 +51,7 @@ GOLDEN_DATASET = [
 ]
 
 
+<<<<<<< HEAD
 def score_contains(output: str, must_contain: list[str]) -> float:
     return 1.0 if all(w in output.lower() for w in must_contain) else 0.0
 
@@ -60,6 +70,84 @@ def score_valid_json(output: str) -> float:
         return 1.0
     except json.JSONDecodeError:
         return 0.0
+=======
+# ── DeepEval custom metrics ─────────────────────────────────
+
+
+class ContainsMetric(BaseMetric):
+    def __init__(self, words: list[str]):
+        self.words = words
+        self.threshold = 0.5
+        self.score = 0.0
+
+    def measure(self, test_case: LLMTestCase):
+        self.score = 1.0 if all(w in test_case.actual_output.lower() for w in self.words) else 0.0
+        return self.score
+
+    def is_successful(self):
+        return (self.score or 0.0) >= self.threshold
+
+
+class ExcludesMetric(BaseMetric):
+    def __init__(self, words: list[str]):
+        self.words = words
+        self.threshold = 0.5
+        self.score = 0.0
+
+    def measure(self, test_case: LLMTestCase):
+        self.score = 0.0 if any(w in test_case.actual_output.lower() for w in self.words) else 1.0
+        return self.score
+
+    def is_successful(self):
+        return (self.score or 0.0) >= self.threshold
+
+
+class MaxWordsMetric(BaseMetric):
+    def __init__(self, max_words: int):
+        self.max_words = max_words
+        self.threshold = 0.5
+        self.score = 0.0
+
+    def measure(self, test_case: LLMTestCase):
+        self.score = 1.0 if len(test_case.actual_output.split()) <= self.max_words else 0.0
+        return self.score
+
+    def is_successful(self):
+        return (self.score or 0.0) >= self.threshold
+
+
+class ValidJsonMetric(BaseMetric):
+    def __init__(self):
+        self.threshold = 0.5
+        self.score = 0.0
+
+    def measure(self, test_case: LLMTestCase):
+        try:
+            json.loads(test_case.actual_output)
+            self.score = 1.0
+        except json.JSONDecodeError:
+            self.score = 0.0
+        return self.score
+
+    def is_successful(self):
+        return (self.score or 0.0) >= self.threshold
+
+
+# ── Runner ──────────────────────────────────────────────────
+
+
+def build_metrics(case: dict) -> list[BaseMetric]:
+    metrics = []
+    if "must_contain" in case:
+        metrics.append(ContainsMetric(case["must_contain"]))
+    if "must_not_contain" in case:
+        metrics.append(ExcludesMetric(case["must_not_contain"]))
+    if "max_words" in case:
+        metrics.append(MaxWordsMetric(case["max_words"]))
+    if case.get("expects_valid_json"):
+        metrics.append(ValidJsonMetric())
+    return metrics
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 
 
 def run_eval_case(case: dict) -> dict:
@@ -67,6 +155,7 @@ def run_eval_case(case: dict) -> dict:
     response = model.invoke(case["prompt"])
     output = response.content.strip()
 
+<<<<<<< HEAD
     scores = {}
     if "must_contain" in case:
         scores["must_contain"] = score_contains(output, case["must_contain"])
@@ -76,6 +165,15 @@ def run_eval_case(case: dict) -> dict:
         scores["max_words"] = score_max_words(output, case["max_words"])
     if case.get("expects_valid_json"):
         scores["valid_json"] = score_valid_json(output)
+=======
+    tc = LLMTestCase(input=case["prompt"], actual_output=output)
+    metrics = build_metrics(case)
+
+    scores = {}
+    for m in metrics:
+        m.measure(tc)
+        scores[type(m).__name__] = m.score
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 
     overall = statistics.mean(scores.values()) if scores else 0.0
     return {
@@ -99,6 +197,7 @@ def run_suite(n: int = 3) -> list[dict]:
     return results
 
 
+<<<<<<< HEAD
 def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
     """Generate golden test cases from source files using the model itself.
 
@@ -109,6 +208,44 @@ def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
     """
     import ast, os
 
+=======
+# ── Baseline / gate ─────────────────────────────────────────
+
+
+def load_baseline() -> dict:
+    if BASELINE_FILE.exists():
+        return json.loads(BASELINE_FILE.read_text())
+    return {}
+
+
+def save_baseline(results: list[dict]):
+    baseline = {r["id"]: r["mean"] for r in results}
+    BASELINE_FILE.write_text(json.dumps(baseline, indent=2) + "\n")
+    print(f"Saved baseline to {BASELINE_FILE}")
+
+
+def gate_results(results: list[dict], baseline: dict):
+    failed = False
+    for r in results:
+        mean = r["mean"]
+        prev = baseline.get(r["id"], 0.0)
+        delta = mean - prev
+        status = "PASS" if delta >= 0 else "REGRESS"
+        if delta < 0:
+            failed = True
+        print(f"  {status:7s}  {r['id']:30s}  {mean:.3f}  (was {prev:.3f}, Δ {delta:+.3f})")
+    if failed:
+        print("\n❌ REGRESSION DETECTED — gate failed")
+        raise SystemExit(1)
+    else:
+        print("\n✅ All scores at or above baseline — gate passed")
+
+
+# ── Synthetic case generation ───────────────────────────────
+
+
+def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
     src_root = Path(__file__).parent.parent / source_dir
     texts = []
     for pyfile in sorted(src_root.rglob("*.py")):
@@ -143,6 +280,7 @@ def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
     except json.JSONDecodeError:
         return []
     return cases if isinstance(cases, list) else []
+<<<<<<< HEAD
 
 
 def load_baseline() -> dict:
@@ -172,3 +310,5 @@ def gate_results(results: list[dict], baseline: dict):
         raise SystemExit(1)
     else:
         print("\n✅ All scores at or above baseline — gate passed")
+=======
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)

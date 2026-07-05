@@ -1,0 +1,5 @@
+deepeval>=4.0.7
+langchain-aws
+langchain-groq
+langchain-openai
+python-dotenv

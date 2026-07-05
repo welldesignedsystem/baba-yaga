@@ -5,6 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+<<<<<<< HEAD
+=======
+    "deepeval>=4.0.7",
+>>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
     "langchain-aws",
     "langchain-groq",
     "langchain-openai",
