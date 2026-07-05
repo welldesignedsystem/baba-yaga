@@ -1,19 +1,20 @@
 """Golden dataset regression eval.
 
 Usage:
-    uv run python scripts/golden_eval.py              # run, show scores
-    uv run python scripts/golden_eval.py --baseline   # record baseline
-    uv run python scripts/golden_eval.py --gate       # gate against baseline
+    uv run python scripts/golden_eval.py                    # run, show scores
+    uv run python scripts/golden_eval.py --baseline         # record baseline
+    uv run python scripts/golden_eval.py --gate             # gate against baseline
+    uv run python scripts/golden_eval.py --generate         # generate synthetic cases
+    uv run python scripts/golden_eval.py --roundtrip        # run roundtrip consistency suite
 """
 
 import argparse
+import json
 import os
 import sys
 
-import json
-
-from eval import GOLDEN_DATASET, generate_synthetic_cases
-from eval import gate_results, load_baseline, save_baseline, run_suite
+from eval import GOLDEN_DATASET, ROUNDTRIP_DATASET, generate_synthetic_cases
+from eval import gate_results, load_baseline, save_baseline, run_suite, run_roundtrip_suite
 
 
 def main():
@@ -21,7 +22,8 @@ def main():
     parser.add_argument("--baseline", action="store_true", help="Record baseline scores")
     parser.add_argument("--gate", action="store_true", help="Gate against existing baseline")
     parser.add_argument("--samples", type=int, default=3, help="Runs per case (default: 3)")
-    parser.add_argument("--generate", action="store_true", help="Generate synthetic cases from source, then run them")
+    parser.add_argument("--generate", action="store_true", help="Generate synthetic cases from source")
+    parser.add_argument("--roundtrip", action="store_true", help="Run roundtrip consistency suite")
     args = parser.parse_args()
 
     if not os.environ.get("OPENROUTER_API_KEY"):
@@ -32,6 +34,21 @@ def main():
         print("Generating synthetic cases from source...")
         cases = generate_synthetic_cases()
         print(f"Generated {len(cases)} cases:\n{json.dumps(cases, indent=2)}\n")
+
+    if args.roundtrip:
+        print(f"Roundtrip: {len(ROUNDTRIP_DATASET)} cases × {args.samples} samples each...\n")
+        results = run_roundtrip_suite(n=args.samples)
+        for r in results:
+            print(f"  {r['id']:30s}  mean={r['mean']:.3f}  stdev={r['stdev']:.3f}")
+        if args.baseline:
+            save_baseline(results)
+        elif args.gate:
+            baseline = load_baseline()
+            if not baseline:
+                print("No baseline found. Run with --baseline first.")
+                sys.exit(1)
+            gate_results(results, baseline)
+        return
 
     print(f"Running {len(GOLDEN_DATASET)} golden cases × {args.samples} samples each...\n")
     results = run_suite(n=args.samples)

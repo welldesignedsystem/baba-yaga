@@ -1,6 +1,8 @@
 import json
+import subprocess
 import statistics
 from pathlib import Path
+from typing import Any
 
 <<<<<<< HEAD
 =======
@@ -281,6 +283,7 @@ def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
         return []
     return cases if isinstance(cases, list) else []
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 def load_baseline() -> dict:
@@ -312,3 +315,105 @@ def gate_results(results: list[dict], baseline: dict):
         print("\n✅ All scores at or above baseline — gate passed")
 =======
 >>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
+=======
+
+
+# ── Roundtrip consistency: code ↔ docs ─────────────────────
+
+
+ROUNDTRIP_DATASET = [
+    {
+        "id": "auth-module",
+        "doc_path": "docs/design/auth.md",
+        "code_path": "src/auth/",
+        "check_compile": True,
+        "check_signatures": ["login()", "verify_token()", "refresh()"],
+        "check_exports": ["authenticate", "AuthError"],
+    },
+]
+
+
+def code_compile_score(path: str) -> float:
+    try:
+        result = subprocess.run(
+            ["python", "-m", "py_compile", path],
+            capture_output=True, text=True, timeout=10,
+        )
+        return 1.0 if result.returncode == 0 else 0.0
+    except Exception:
+        return 0.0
+
+
+def extract_signatures(code: str) -> list[str]:
+    """Extract function signatures from code text (simple heuristic)."""
+    sigs = []
+    for line in code.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("def "):
+            sigs.append(stripped.removeprefix("def ").split(":")[0].strip())
+    return sigs
+
+
+def signature_match_score(generated_code: str, expected: list[str]) -> float:
+    found = extract_signatures(generated_code)
+    return 1.0 if all(s in found for s in expected) else 0.0
+
+
+def doc_roundtrip_score(original_doc: str, generated_doc: str) -> float:
+    """Score how much of the original doc structure is preserved."""
+    import re
+    original_headers = set(re.findall(r"^#{1,4}\s+", original_doc, re.MULTILINE))
+    generated_headers = set(re.findall(r"^#{1,4}\s+", generated_doc, re.MULTILINE))
+    if not original_headers:
+        return 1.0
+    intersection = original_headers & generated_headers
+    return len(intersection) / len(original_headers)
+
+
+def run_roundtrip_case(case: dict) -> dict:
+    doc_path = Path(__file__).parent.parent / case["doc_path"]
+    original_doc = doc_path.read_text() if doc_path.exists() else ""
+
+    # doc → code
+    prompt = f"Write Python code implementing the following spec:\n\n{original_doc[:4000]}"
+    model = openrouter_chat_model(temperature=0.0)
+    generated_code = model.invoke(prompt).content.strip()
+
+    compile_score = 0.0
+    sig_score = 0.0
+    if case.get("check_compile"):
+        compile_score = code_compile_score(generated_code)
+    if case.get("check_signatures"):
+        sig_score = signature_match_score(generated_code, case["check_signatures"])
+
+    # code → doc (regenerate docs from generated code)
+    prompt2 = f"Write documentation for the following Python code:\n\n{generated_code[:4000]}"
+    generated_doc = model.invoke(prompt2).content.strip()
+
+    rt_score = doc_roundtrip_score(original_doc, generated_doc)
+
+    scores = {
+        "code_compile": compile_score,
+        "signature_match": sig_score,
+        "doc_roundtrip": rt_score,
+    }
+    overall = statistics.mean(scores.values()) if scores else 0.0
+    return {
+        "id": case["id"],
+        "overall": round(overall, 3),
+        "scores": scores,
+    }
+
+
+def run_roundtrip_suite(n: int = 1) -> list[dict]:
+    results = []
+    for case in ROUNDTRIP_DATASET:
+        case_runs = [run_roundtrip_case(case) for _ in range(n)]
+        overalls = [r["overall"] for r in case_runs]
+        results.append({
+            "id": case["id"],
+            "mean": round(statistics.mean(overalls), 3),
+            "stdev": round(statistics.stdev(overalls), 3) if n > 1 else 0.0,
+        })
+    return results
+>>>>>>> 6723e24 (Enhance golden_eval.py with roundtrip consistency checks and update usage instructions; add analyze_sessions.py for productivity metrics analysis)
