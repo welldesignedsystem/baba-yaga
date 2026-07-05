@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/llm.py
-src/baba_yaga.egg-info/PKG-INFO
-src/baba_yaga.egg-info/SOURCES.txt
-src/baba_yaga.egg-info/dependency_links.txt
-src/baba_yaga.egg-info/requires.txt
-src/baba_yaga.egg-info/top_level.txt
-tests/test_llm.py
