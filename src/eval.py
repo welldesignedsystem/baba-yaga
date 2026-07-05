@@ -1,14 +1,11 @@
 import json
-import subprocess
+import re
 import statistics
+import subprocess
 from pathlib import Path
-from typing import Any
 
-<<<<<<< HEAD
-=======
 from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 from dotenv import load_dotenv
 
 from llm import openrouter_chat_model
@@ -17,10 +14,6 @@ load_dotenv()
 
 BASELINE_FILE = Path(__file__).parent.parent / "eval-baseline.json"
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 GOLDEN_DATASET = [
     {
         "id": "capital-france",
@@ -52,27 +45,18 @@ GOLDEN_DATASET = [
     },
 ]
 
-
-<<<<<<< HEAD
-def score_contains(output: str, must_contain: list[str]) -> float:
-    return 1.0 if all(w in output.lower() for w in must_contain) else 0.0
-
-
-def score_excludes(output: str, must_not_contain: list[str]) -> float:
-    return 0.0 if any(w in output.lower() for w in must_not_contain) else 1.0
-
-
-def score_max_words(output: str, max_words: int) -> float:
-    return 1.0 if len(output.split()) <= max_words else 0.0
+ROUNDTRIP_DATASET = [
+    {
+        "id": "auth-module",
+        "doc_path": "docs/design/auth.md",
+        "code_path": "src/auth/",
+        "check_compile": True,
+        "check_signatures": ["login()", "verify_token()", "refresh()"],
+        "check_exports": ["authenticate", "AuthError"],
+    },
+]
 
 
-def score_valid_json(output: str) -> float:
-    try:
-        json.loads(output)
-        return 1.0
-    except json.JSONDecodeError:
-        return 0.0
-=======
 # ── DeepEval custom metrics ─────────────────────────────────
 
 
@@ -135,7 +119,7 @@ class ValidJsonMetric(BaseMetric):
         return (self.score or 0.0) >= self.threshold
 
 
-# ── Runner ──────────────────────────────────────────────────
+# ── Helpers ──────────────────────────────────────────────────
 
 
 def build_metrics(case: dict) -> list[BaseMetric]:
@@ -149,41 +133,28 @@ def build_metrics(case: dict) -> list[BaseMetric]:
     if case.get("expects_valid_json"):
         metrics.append(ValidJsonMetric())
     return metrics
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
+
+
+def score_from_case(case: dict, output: str) -> dict:
+    tc = LLMTestCase(input=case["prompt"], actual_output=output)
+    metrics = build_metrics(case)
+    scores = {}
+    for m in metrics:
+        m.measure(tc)
+        scores[type(m).__name__] = m.score
+    overall = statistics.mean(scores.values()) if scores else 0.0
+    return {"id": case["id"], "overall": round(overall, 3), "scores": scores}
+
+
+# ── Runner ──────────────────────────────────────────────────
 
 
 def run_eval_case(case: dict) -> dict:
     model = openrouter_chat_model(temperature=0.0)
     response = model.invoke(case["prompt"])
-    output = response.content.strip()
-
-<<<<<<< HEAD
-    scores = {}
-    if "must_contain" in case:
-        scores["must_contain"] = score_contains(output, case["must_contain"])
-    if "must_not_contain" in case:
-        scores["must_not_contain"] = score_excludes(output, case["must_not_contain"])
-    if "max_words" in case:
-        scores["max_words"] = score_max_words(output, case["max_words"])
-    if case.get("expects_valid_json"):
-        scores["valid_json"] = score_valid_json(output)
-=======
-    tc = LLMTestCase(input=case["prompt"], actual_output=output)
-    metrics = build_metrics(case)
-
-    scores = {}
-    for m in metrics:
-        m.measure(tc)
-        scores[type(m).__name__] = m.score
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
-
-    overall = statistics.mean(scores.values()) if scores else 0.0
-    return {
-        "id": case["id"],
-        "overall": round(overall, 3),
-        "scores": scores,
-        "output_snippet": output[:120],
-    }
+    result = score_from_case(case, response.content.strip())
+    result["output_snippet"] = response.content.strip()[:120]
+    return result
 
 
 def run_suite(n: int = 3) -> list[dict]:
@@ -199,18 +170,6 @@ def run_suite(n: int = 3) -> list[dict]:
     return results
 
 
-<<<<<<< HEAD
-def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
-    """Generate golden test cases from source files using the model itself.
-
-    Reads all Python files under *source_dir*, sends them to the model with a
-    prompt asking it to propose eval cases (prompt + scoring criteria), and
-    returns the parsed result.  This lets you expand coverage from real code
-    instead of inventing every case by hand.
-    """
-    import ast, os
-
-=======
 # ── Baseline / gate ─────────────────────────────────────────
 
 
@@ -239,15 +198,13 @@ def gate_results(results: list[dict], baseline: dict):
     if failed:
         print("\n❌ REGRESSION DETECTED — gate failed")
         raise SystemExit(1)
-    else:
-        print("\n✅ All scores at or above baseline — gate passed")
+    print("\n✅ All scores at or above baseline — gate passed")
 
 
 # ── Synthetic case generation ───────────────────────────────
 
 
 def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
     src_root = Path(__file__).parent.parent / source_dir
     texts = []
     for pyfile in sorted(src_root.rglob("*.py")):
@@ -282,55 +239,9 @@ def generate_synthetic_cases(source_dir: str = "src") -> list[dict]:
     except json.JSONDecodeError:
         return []
     return cases if isinstance(cases, list) else []
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-def load_baseline() -> dict:
-    if BASELINE_FILE.exists():
-        return json.loads(BASELINE_FILE.read_text())
-    return {}
-
-
-def save_baseline(results: list[dict]):
-    baseline = {r["id"]: r["mean"] for r in results}
-    BASELINE_FILE.write_text(json.dumps(baseline, indent=2) + "\n")
-    print(f"Saved baseline to {BASELINE_FILE}")
-
-
-def gate_results(results: list[dict], baseline: dict):
-    failed = False
-    for r in results:
-        mean = r["mean"]
-        prev = baseline.get(r["id"], 0.0)
-        delta = mean - prev
-        status = "PASS" if delta >= 0 else "REGRESS"
-        if delta < 0:
-            failed = True
-        print(f"  {status:7s}  {r['id']:30s}  {mean:.3f}  (was {prev:.3f}, Δ {delta:+.3f})")
-    if failed:
-        print("\n❌ REGRESSION DETECTED — gate failed")
-        raise SystemExit(1)
-    else:
-        print("\n✅ All scores at or above baseline — gate passed")
-=======
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
-=======
 
 
 # ── Roundtrip consistency: code ↔ docs ─────────────────────
-
-
-ROUNDTRIP_DATASET = [
-    {
-        "id": "auth-module",
-        "doc_path": "docs/design/auth.md",
-        "code_path": "src/auth/",
-        "check_compile": True,
-        "check_signatures": ["login()", "verify_token()", "refresh()"],
-        "check_exports": ["authenticate", "AuthError"],
-    },
-]
 
 
 def code_compile_score(path: str) -> float:
@@ -345,7 +256,6 @@ def code_compile_score(path: str) -> float:
 
 
 def extract_signatures(code: str) -> list[str]:
-    """Extract function signatures from code text (simple heuristic)."""
     sigs = []
     for line in code.splitlines():
         stripped = line.strip()
@@ -360,8 +270,6 @@ def signature_match_score(generated_code: str, expected: list[str]) -> float:
 
 
 def doc_roundtrip_score(original_doc: str, generated_doc: str) -> float:
-    """Score how much of the original doc structure is preserved."""
-    import re
     original_headers = set(re.findall(r"^#{1,4}\s+", original_doc, re.MULTILINE))
     generated_headers = set(re.findall(r"^#{1,4}\s+", generated_doc, re.MULTILINE))
     if not original_headers:
@@ -374,7 +282,6 @@ def run_roundtrip_case(case: dict) -> dict:
     doc_path = Path(__file__).parent.parent / case["doc_path"]
     original_doc = doc_path.read_text() if doc_path.exists() else ""
 
-    # doc → code
     prompt = f"Write Python code implementing the following spec:\n\n{original_doc[:4000]}"
     model = openrouter_chat_model(temperature=0.0)
     generated_code = model.invoke(prompt).content.strip()
@@ -386,23 +293,14 @@ def run_roundtrip_case(case: dict) -> dict:
     if case.get("check_signatures"):
         sig_score = signature_match_score(generated_code, case["check_signatures"])
 
-    # code → doc (regenerate docs from generated code)
     prompt2 = f"Write documentation for the following Python code:\n\n{generated_code[:4000]}"
     generated_doc = model.invoke(prompt2).content.strip()
 
     rt_score = doc_roundtrip_score(original_doc, generated_doc)
 
-    scores = {
-        "code_compile": compile_score,
-        "signature_match": sig_score,
-        "doc_roundtrip": rt_score,
-    }
+    scores = {"code_compile": compile_score, "signature_match": sig_score, "doc_roundtrip": rt_score}
     overall = statistics.mean(scores.values()) if scores else 0.0
-    return {
-        "id": case["id"],
-        "overall": round(overall, 3),
-        "scores": scores,
-    }
+    return {"id": case["id"], "overall": round(overall, 3), "scores": scores}
 
 
 def run_roundtrip_suite(n: int = 1) -> list[dict]:
@@ -416,4 +314,3 @@ def run_roundtrip_suite(n: int = 1) -> list[dict]:
             "stdev": round(statistics.stdev(overalls), 3) if n > 1 else 0.0,
         })
     return results
->>>>>>> 6723e24 (Enhance golden_eval.py with roundtrip consistency checks and update usage instructions; add analyze_sessions.py for productivity metrics analysis)

@@ -3,8 +3,6 @@ revision = 3
 requires-python = ">=3.12"
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "aiohappyeyeballs"
 version = "2.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -136,7 +134,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -159,8 +156,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "attrs"
 version = "26.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -170,15 +165,11 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "baba-yaga"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-<<<<<<< HEAD
-=======
     { name = "deepeval" },
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
     { name = "langchain-aws" },
     { name = "langchain-groq" },
     { name = "langchain-openai" },
@@ -187,10 +178,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-<<<<<<< HEAD
-=======
     { name = "deepeval", specifier = ">=4.0.7" },
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
     { name = "langchain-aws" },
     { name = "langchain-groq" },
     { name = "langchain-openai" },
@@ -198,8 +186,6 @@ requires-dist = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "backoff"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -209,7 +195,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "boto3"
 version = "1.43.40"
 source = { registry = "https://pypi.org/simple" }
@@ -320,8 +305,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "click"
 version = "8.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -334,7 +317,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -344,8 +326,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "deepeval"
 version = "4.0.7"
 source = { registry = "https://pypi.org/simple" }
@@ -385,7 +365,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "distro"
 version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -395,8 +374,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "execnet"
 version = "2.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -495,7 +472,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "groq"
 version = "0.37.1"
 source = { registry = "https://pypi.org/simple" }
@@ -513,8 +489,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "grpcio"
 version = "1.81.1"
 source = { registry = "https://pypi.org/simple" }
@@ -556,7 +530,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -603,8 +576,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -626,7 +597,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "jiter"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -824,8 +794,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "markdown-it-py"
 version = "4.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1018,7 +986,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "numpy"
 version = "2.5.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1089,8 +1056,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "opentelemetry-api"
 version = "1.43.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1130,7 +1095,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "orjson"
 version = "3.11.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1193,8 +1157,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1325,7 +1287,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "pydantic"
 version = "2.13.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1416,8 +1377,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pydantic-settings"
 version = "2.14.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1517,7 +1476,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -1539,8 +1497,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pywin32"
 version = "312"
 source = { registry = "https://pypi.org/simple" }
@@ -1560,7 +1516,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1722,8 +1677,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "rich"
 version = "14.3.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1737,7 +1690,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "s3transfer"
 version = "0.19.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1750,8 +1702,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "sentry-sdk"
 version = "2.64.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1783,7 +1733,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "six"
 version = "1.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1802,8 +1751,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "tabulate"
 version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1813,7 +1760,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "tenacity"
 version = "9.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1882,8 +1828,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "typer"
 version = "0.26.8"
 source = { registry = "https://pypi.org/simple" }
@@ -1899,7 +1843,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "typing-extensions"
 version = "4.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2040,8 +1983,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "wheel"
 version = "0.47.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2054,7 +1995,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "xxhash"
 version = "3.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2168,8 +2108,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "yarl"
 version = "1.24.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2252,7 +2190,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> 65da501 (Refactor code structure for improved readability and maintainability)
 name = "zstandard"
 version = "0.25.0"
 source = { registry = "https://pypi.org/simple" }
