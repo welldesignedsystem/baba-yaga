@@ -1,0 +1,59 @@
+# Promptfoo config — prompt/model comparison with regression gating.
+#
+# Run:
+#   npx promptfoo eval -c scripts/example_promptfoo.yaml
+#   npx promptfoo view              # web UI for results
+#
+# Install: npm install -g promptfoo
+
+# ── Providers (models under test) ──────────────────────────
+
+prompts:
+  - "Answer concisely. {{prompt}}"
+
+providers:
+  - id: openai:gpt-4o-mini
+    config:
+      temperature: 0.0
+  - id: openai:gpt-4o
+    config:
+      temperature: 0.0
+
+# ── Test cases ─────────────────────────────────────────────
+
+tests:
+  # Deterministic checks (substring, regex, JSON)
+  - vars:
+      prompt: "What is the capital of France? Answer in one word."
+    assert:
+      - type: contains
+        value: Paris
+      - type: javascript
+        value: output.length < 20
+
+  - vars:
+      prompt: "Return valid JSON: {\"name\": \"Alice\", \"age\": 30}"
+    assert:
+      - type: is-json
+      - type: javascript
+        value: JSON.parse(output).age === 30
+
+  # Model-graded check (LLM-as-judge)
+  - vars:
+      prompt: "Write a Python function that returns the nth Fibonacci number."
+    assert:
+      - type: llm-rubric
+        value: >
+          Does the response contain a working Python function definition
+          that correctly implements Fibonacci? Score > 0.8.
+
+  # Latency / cost guardrail
+  - vars:
+      prompt: "Explain quantum computing in 3 sentences."
+    assert:
+      - type: latency
+        value: 5000  # max 5 seconds
+
+# ── Output ─────────────────────────────────────────────────
+
+outputPath: scripts/example_promptfoo_results.json
