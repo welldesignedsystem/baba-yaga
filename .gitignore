@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 .deepeval/
 *.egg-info/
+
+# Generated eval artifacts
+review-*.csv
+eval-baseline-*.json
