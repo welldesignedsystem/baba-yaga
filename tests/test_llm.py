@@ -167,7 +167,9 @@ class TestCapitalOfFrance(unittest.TestCase):
         if not os.environ.get(env_var):
             self.skipTest(f"{env_var} not set")
         try:
-            response = model.invoke("What is the capital of France? Answer in one word.")
+            question = "What is the capital of France? Answer in one word."
+            response = model.invoke(question)
+            print(question, "->", response.content)
         except ClientError as e:
             if ignore_client_error:
                 self.skipTest(str(e))

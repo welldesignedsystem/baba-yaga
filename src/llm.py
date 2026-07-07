@@ -45,7 +45,7 @@ def openrouter_chat_model(
 class BedrockConfig:
     model: str = field(default_factory=lambda: os.environ.get("BEDROCK_MODEL", "us.anthropic.claude-haiku-4-5-20251001-v1:0"))
     region_name: str = field(default_factory=lambda: os.environ.get("AWS_REGION", "us-east-1"))
-    profile_name: str = field(default_factory=lambda: os.environ.get("AWS_PROFILE", "default"))
+    profile_name: str | None = field(default_factory=lambda: os.environ.get("AWS_PROFILE", "babayaga"))
 
 
 def bedrock_chat_model(
@@ -54,13 +54,15 @@ def bedrock_chat_model(
     config: BedrockConfig | None = None,
 ) -> ChatBedrock:
     cfg = config or BedrockConfig()
-    return ChatBedrock(
+    kwargs = dict(
         model=cfg.model,
         temperature=temperature,
         max_tokens=max_tokens,
         region_name=cfg.region_name,
-        credentials_profile_name=cfg.profile_name,
     )
+    if cfg.profile_name:
+        kwargs["credentials_profile_name"] = cfg.profile_name
+    return ChatBedrock(**kwargs)
 
 
 # ── Groq ────────────────────────────────────────────────────
@@ -83,3 +85,33 @@ def groq_chat_model(
         max_tokens=max_tokens,
         api_key=cfg.api_key,
     )
+
+
+if __name__ == "__main__":
+    import time
+
+    prompt = "What is the capital of India? Answer in one word."
+
+    providers = []
+
+    if os.environ.get("OPENROUTER_API_KEY"):
+        providers.append(("OpenRouter", openrouter_chat_model()))
+    try:
+        providers.append(("Bedrock", bedrock_chat_model()))
+    except Exception:
+        pass
+    if os.environ.get("GROQ_API_KEY"):
+        providers.append(("Groq", groq_chat_model()))
+
+    if not providers:
+        print("No API keys found. Set OPENROUTER_API_KEY, AWS_PROFILE/Bedrock, or GROQ_API_KEY.")
+        exit(1)
+
+    for name, model in providers:
+        try:
+            start = time.time()
+            response = model.invoke(prompt)
+            elapsed = time.time() - start
+            print(f"{name:12s} → {response.content.strip():30s}  ({elapsed:.2f}s)")
+        except Exception as e:
+            print(f"{name:12s} → ERROR: {e}")
