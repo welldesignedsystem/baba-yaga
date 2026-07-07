@@ -1,0 +1,24 @@
+openapi: "3.0.3"
+info:
+  title: Ping API
+  version: "0.1.0"
+  description: A minimal API with a single endpoint and no named schemas
+servers:
+  - url: https://ping.example.com
+
+paths:
+  /ping:
+    get:
+      operationId: ping
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
